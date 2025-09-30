@@ -10,7 +10,7 @@ const AIAssistantWidget = ({
   suggestion,
   onAccept,
   onReject,
-  acceptLabel = '✓ Accept',
+  acceptLabel = "✓ Accept",
 }) => {
   if (!suggestion && !isProcessing) return null;
 
@@ -47,17 +47,25 @@ const AIAssistantWidget = ({
   );
 };
 
-export default function NewMatterForm({ onClose, onSave }) {
-  const [formData, setFormData] = useState({
-    matterType: "",
-    title: "",
-    client: "",
-    opponent: "",
-    court: "",
-    description: "",
-    urgency: "medium",
-    expectedDuration: "",
-  });
+export default function NewMatterForm({
+  onClose,
+  onSave,
+  initialData = null,
+  mode = "create",
+}) {
+  const [formData, setFormData] = useState(
+    () =>
+      initialData ?? {
+        matterType: "",
+        title: "",
+        client: "",
+        opponent: "",
+        court: "",
+        description: "",
+        urgency: "Medium", // preserve your capitalized priority style
+        expectedDuration: "",
+      }
+  );
 
   const [aiAction, setAiAction] = useState(null);
   const [aiSuggestion, setAiSuggestion] = useState("");
@@ -201,7 +209,9 @@ export default function NewMatterForm({ onClose, onSave }) {
           suggestion={aiSuggestion}
           onAccept={handleAIAccept}
           onReject={handleAIReject}
-          acceptLabel={aiAction?.type === 'setUrgency' ? '✓ Mark as Urgent' : '✓ Accept'}
+          acceptLabel={
+            aiAction?.type === "setUrgency" ? "✓ Mark as Urgent" : "✓ Accept"
+          }
         />
 
         {/* Matter Type Selection */}
@@ -426,13 +436,12 @@ export default function NewMatterForm({ onClose, onSave }) {
           </Button>
           <Button
             variant="primary"
-            onClick={() => {
-              // Here we would normally save the matter
-              alert("Matter would be saved with AI-enhanced data");
-              onClose();
+            onClick={async () => {
+              // parent (LawMastersPrototype) will call repo.upsertMatter and refresh
+              await onSave?.(formData);
             }}
           >
-            Create Matter
+            {mode === "edit" ? "Save Changes" : "Create Matter"}
           </Button>
         </div>
       </div>
